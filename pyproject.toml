@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "geometric_tools"
+version = "0.0.1"
+authors = [
+    {name = "Santiago F. Caracciolo", email = "santiago.caracciolo@gmail.com"},
+]
+description = "Some basic geometric operations based on Open3D like sphere and surface projections."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "open3d"
+]
