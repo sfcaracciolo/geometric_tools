@@ -45,18 +45,19 @@ def cartesian_to_spherical_coords(vertices:Union[np.ndarray, Vector3dVector]) ->
     if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
     x, y, z = vertices[:,0], vertices[:,1], vertices[:,2]
     spherical = np.empty_like(vertices)
-    ρ, φ, θ = spherical[:,0], spherical[:,1], spherical[:,2]
+    ρ, θ, φ = spherical[:,0], spherical[:,1], spherical[:,2]
     ρ[:] = np.linalg.norm(vertices, axis=1) 
-    φ[:] = np.arccos(z/ρ)
-    θ[:] = np.arctan2(y, x)
+    θ[:] = np.arccos(z/ρ)
+    φ[:] = np.arctan2(y, x)
     return spherical
 
 def spherical_to_cartesian_coords(vertices:Union[np.ndarray, Vector3dVector]) -> np.ndarray:
     if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
-    ρ, φ, θ = vertices[:,0], vertices[:,1], vertices[:,2]
+    ρ, θ, φ = vertices[:,0], vertices[:,1], vertices[:,2]
     cartesian = np.empty_like(vertices)
     x, y, z = cartesian[:,0], cartesian[:,1], cartesian[:,2]
-    x[:] = ρ*np.sin(φ)*np.cos(θ)
-    y[:] = ρ*np.sin(φ)*np.sin(θ)
-    z[:] = ρ*np.cos(φ)
+    x[:] = ρ*np.sin(θ)*np.cos(φ)
+    y[:] = ρ*np.sin(θ)*np.sin(φ)
+    z[:] = ρ*np.cos(θ)
     return cartesian
+
