@@ -6,6 +6,6 @@ etc/
 share/
 pyvenv.cfg
 __pycache__
-*.eps
-*.pdf
+data/
+
 
