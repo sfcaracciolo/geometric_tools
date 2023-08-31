@@ -1,25 +1,28 @@
-from src.geometric_tools import * 
-import zarr
-import geometric_plotter
+from open3d.geometry import TriangleMesh
+from geometric_plotter import Plotter
+import pathlib
+import numpy as np 
+from src import geometric_tools
 
-ZARR_PATH = 'E:\db.zarr'
-root = zarr.open(ZARR_PATH, mode='r')
-nodes = root['/sinus_pig/data/torso/electrodes'][:]
+filename = pathlib.Path(__file__).stem
 
-geometric_plotter.set_export()
+# create cylinder surface
+mesh = TriangleMesh().create_cylinder(radius=1.0, height=2.0, resolution=20, split=4)
+surface = geometric_tools.scene_surface(mesh.vertices, mesh.triangles)
 
-center, radius = compute_inner_sphere(nodes)
-sphere_nodes = project_to_sphere(nodes, center, radius/2.)
-triangle_mesh, indices = compute_convex_hull(sphere_nodes)
-vertices, triangles = nodes[indices], np.asarray(triangle_mesh.triangles)
+# create inner sphere mesh
+center, radius = geometric_tools.compute_inner_sphere(mesh.vertices)
+sphere_nodes = geometric_tools.project_to_sphere(mesh.vertices, center, radius/2.)
 
-ax = geometric_plotter.figure(figsize=(5,5))
+# projection
+projected_nodes = geometric_tools.project_to_surface(sphere_nodes, surface)
 
-geometric_plotter.plot_trisurf(ax, vertices, triangles, color='k', alpha=.5)
+Plotter.set_export()
 
-surface = scene_surface(vertices, triangles)
-projected_nodes = project_to_surface(sphere_nodes, surface)
+p0 = Plotter(figsize=(5,5))
+p0.add_trisurf(np.asarray(mesh.vertices), np.asarray(mesh.triangles), alpha=.1)
+p0.add_scatter(projected_nodes, s=50, color='r')
+p0.camera(view=(25, 0, 0), zoom=1.)
+p0.save(folder='figs/', name=filename)
 
-geometric_plotter.scatter(ax, projected_nodes, s=25, color='red', alpha=1)
-geometric_plotter.config_ax(ax, (50,-150,0), 1.)
-geometric_plotter.execute(folder='E:\Repositorios\geometric_tools\export\\', name='project_to_surface')
+Plotter.show()
