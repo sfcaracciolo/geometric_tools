@@ -4,6 +4,7 @@ from open3d.utility import Vector3dVector, Vector3iVector
 from open3d.geometry import PointCloud, TriangleMesh
 from open3d.core import Tensor, float32, uint32
 from open3d.t.geometry import RaycastingScene
+from vector_tools import TriPoint
 
 def scene_surface(vertices: Vector3dVector, triangles: Vector3iVector) -> RaycastingScene:
     t_vertices = Tensor(np.asarray(vertices), float32)
@@ -61,3 +62,35 @@ def spherical_to_cartesian_coords(vertices:Union[np.ndarray, Vector3dVector]) ->
     z[:] = ρ*np.cos(θ)
     return cartesian
 
+def interp_vertices_values_to_triangles(vertices:Union[np.ndarray, Vector3dVector], triangles:Union[np.ndarray, Vector3iVector], values: np.ndarray, method:str='bary') -> np.ndarray:
+    if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
+    if isinstance(triangles, Vector3iVector): triangles = np.asarray(triangles)
+    
+    T = triangles.shape[0]
+    interp_values = np.empty(T, dtype=np.float32)
+    for t_index in range(T):
+        t_indices = triangles[t_index]
+        interp_values[t_index] = TriPoint.barycentric_interp(vertices[t_indices], values[t_indices])
+    return interp_values
+
+def compute_triangle_normals(vertices:Union[np.ndarray, Vector3dVector], triangles:Union[np.ndarray, Vector3iVector], normalize=True):
+    if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
+    if isinstance(triangles, Vector3iVector): triangles = np.asarray(triangles)
+    
+    T = triangles.shape[0]
+    triangle_normals = np.empty((T, 3), dtype=np.float32)
+    for t_index in range(T):
+        t_indices = triangles[t_index]
+        triangle_normals[t_index] = TriPoint.normal(vertices[t_indices], normalize=normalize)
+    return triangle_normals 
+
+def compute_triangle_barycenters(vertices:Union[np.ndarray, Vector3dVector], triangles:Union[np.ndarray, Vector3iVector], normalize=True):
+    if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
+    if isinstance(triangles, Vector3iVector): triangles = np.asarray(triangles)
+    
+    T = triangles.shape[0]
+    triangle_barycenters = np.empty((T, 3), dtype=np.float32)
+    for t_index in range(T):
+        t_indices = triangles[t_index]
+        triangle_barycenters[t_index] = TriPoint.barycenter(vertices[t_indices])
+    return triangle_barycenters
