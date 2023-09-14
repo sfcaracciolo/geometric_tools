@@ -1,4 +1,4 @@
-from typing import Tuple, Union, List
+from typing import Tuple, Union
 import numpy as np 
 from open3d.utility import Vector3dVector, Vector3iVector
 from open3d.geometry import PointCloud, TriangleMesh
@@ -17,13 +17,13 @@ def project_to_surface(vertices: np.ndarray, surface: RaycastingScene) -> np.nda
     t_vertices = Tensor(vertices, float32)
     return surface.compute_closest_points(t_vertices)['points'].numpy()
 
-def triangle_mesh_by_convex_hull_of_inner_sphere(vertices:Union[np.ndarray, Vector3dVector]) -> np.ndarray:
+def triangle_mesh_by_convex_hull_of_inner_sphere(vertices:Union[np.ndarray, Vector3dVector]) -> Tuple[Union[TriangleMesh, Tuple[int]]]:
     center, radius = compute_inner_sphere(vertices)
     projected_vertices = project_to_sphere(vertices, center, radius/2.)
     triangle_mesh, indices = compute_convex_hull(projected_vertices)
     return triangle_mesh, indices
 
-def compute_convex_hull(vertices:Union[np.ndarray, Vector3dVector]) -> Tuple[Union[TriangleMesh, List[int]]]:
+def compute_convex_hull(vertices:Union[np.ndarray, Vector3dVector]) -> Tuple[Union[TriangleMesh, Tuple[int]]]:
     if isinstance(vertices, np.ndarray): vertices = Vector3dVector(vertices)
     pcd = PointCloud(vertices)
     return pcd.compute_convex_hull()
