@@ -42,25 +42,33 @@ def project_to_sphere(vertices:Union[np.ndarray, Vector3dVector], center: np.nda
     m /= np.linalg.norm(m, axis=1, keepdims=True)
     return center + radius * m
 
-def cartesian_to_spherical_coords(vertices:Union[np.ndarray, Vector3dVector]) -> np.ndarray:
-    if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
-    x, y, z = vertices[:,0], vertices[:,1], vertices[:,2]
-    spherical = np.empty_like(vertices)
-    ρ, θ, φ = spherical[:,0], spherical[:,1], spherical[:,2]
-    ρ[:] = np.linalg.norm(vertices, axis=1) # radial
-    θ[:] = np.arctan2(y, x) # azimuthal
-    φ[:] = np.arccos(z/ρ) # polar
-    return spherical
+def cartesian_to_spherical_coords(vertices:Union[np.ndarray, Vector3dVector, Tuple]) -> np.ndarray:
+    if isinstance(vertices, Vector3dVector): 
+        vertices = np.asarray(vertices)
+        x, y, z = vertices[:,0], vertices[:,1], vertices[:,2]
+    if isinstance(vertices, np.ndarray): 
+        x, y, z = vertices[:,0], vertices[:,1], vertices[:,2]
+    if isinstance(vertices, Tuple): 
+        x, y, z = vertices
 
-def spherical_to_cartesian_coords(vertices:Union[np.ndarray, Vector3dVector]) -> np.ndarray:
-    if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
-    ρ, θ, φ = vertices[:,0], vertices[:,1], vertices[:,2]
-    cartesian = np.empty_like(vertices)
-    x, y, z = cartesian[:,0], cartesian[:,1], cartesian[:,2]
-    x[:] = ρ*np.cos(θ)*np.sin(φ)
-    y[:] = ρ*np.sin(θ)*np.sin(φ)
-    z[:] = ρ*np.cos(φ)
-    return cartesian
+    ρ = np.linalg.norm(vertices, axis=1) # radial
+    θ = np.arctan2(y, x) # azimuthal
+    φ = np.arccos(z/ρ) # polar
+    return ρ, θ, φ
+
+def spherical_to_cartesian_coords(vertices:Union[np.ndarray, Vector3dVector, Tuple]) -> np.ndarray:
+    if isinstance(vertices, Vector3dVector): 
+        vertices = np.asarray(vertices)
+        ρ, θ, φ = vertices[:,0], vertices[:,1], vertices[:,2]
+    if isinstance(vertices, np.ndarray): 
+        ρ, θ, φ = vertices[:,0], vertices[:,1], vertices[:,2]
+    if isinstance(vertices, Tuple): 
+        ρ, θ, φ = vertices
+
+    x = ρ*np.cos(θ)*np.sin(φ)
+    y = ρ*np.sin(θ)*np.sin(φ)
+    z = ρ*np.cos(φ)
+    return x, y, z
 
 def interp_vertices_values_to_triangles(vertices:Union[np.ndarray, Vector3dVector], triangles:Union[np.ndarray, Vector3iVector], values: np.ndarray, method:str='bary') -> np.ndarray:
     if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
