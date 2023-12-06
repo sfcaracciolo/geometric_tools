@@ -23,6 +23,14 @@ def triangle_mesh_by_convex_hull_of_inner_sphere(vertices:Union[np.ndarray, Vect
     triangle_mesh, indices = compute_convex_hull(projected_vertices)
     return triangle_mesh, indices
 
+def replace_indices(x:Union[np.ndarray, Vector3iVector], indices: np.ndarray):
+    if isinstance(x, Vector3iVector): x = np.asarray(x)
+    N = x.max()
+    y = np.empty_like(x)
+    for i in range(N+1):
+        y[x == i] = indices[i]
+    return y
+
 def compute_convex_hull(vertices:Union[np.ndarray, Vector3dVector]) -> Tuple[Union[TriangleMesh, Tuple[int]]]:
     if isinstance(vertices, np.ndarray): vertices = Vector3dVector(vertices)
     pcd = PointCloud(vertices)
@@ -35,6 +43,12 @@ def compute_inner_sphere(vertices:Union[np.ndarray, Vector3dVector]) -> Tuple[Un
     distances_to_center = pcd.compute_point_cloud_distance(PointCloud(Vector3dVector(center)))
     max_radius = np.asarray(distances_to_center).min()
     return center, max_radius
+
+def compute_closest_points(test: np.ndarray, target: np.ndarray) -> np.ndarray:
+    cp = []
+    for i in range(test.shape[0]):
+        cp.append(np.linalg.norm(target - test[i][np.newaxis, :], ord=2).argmin())
+    return np.hstack(cp)
 
 def project_to_sphere(vertices:Union[np.ndarray, Vector3dVector], center: np.ndarray, radius: float) -> np.ndarray:
     if isinstance(vertices, Vector3dVector): vertices = np.asarray(vertices)
